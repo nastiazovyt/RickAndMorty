@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {getCharacters} from "./shared/api";
+import {QueryClient, QueryClientProvider, useQuery} from "@tanstack/react-query";
+
+const queryClient = new QueryClient()
+
 
 function App() {
-  const [count, setCount] = useState(0)
+    return (
+        <QueryClientProvider client={queryClient}>
+            <Characters/>
+        </QueryClientProvider>
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+
+    )
+}
+
+function Characters() {
+    const {isPending, error, data} = useQuery({
+        queryKey: ['charactersData'],
+        queryFn: () => getCharacters()
+    })
+
+    if (isPending) return 'Loading'
+    if (error) return 'Error' + error.message
+
+    const characters = data?.results.map(character =>
+        <li key={character.id}>
+            <img src={character.image} alt={character.name}/>
+            <span>{character.name}</span>
+        </li>
+    )
+
+
+    return (
+        <div className="flex justify-center flex-col items-center">
+            <h1 className="pt-6 mb-12 font-raleway leading-3 text-green-900 text-5xl font-extrabold">Characters</h1>
+            <ul className="grid grid-cols-3 gap-6 w-fit m-auto">{characters}</ul>
+        </div>
+    )
 }
 
 export default App
