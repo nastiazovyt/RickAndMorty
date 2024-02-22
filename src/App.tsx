@@ -1,5 +1,5 @@
-import {getCharacters, ResultType} from "./shared/api";
-import {QueryClient, QueryClientProvider, useQuery} from "@tanstack/react-query";
+import {Character, getCharacters, ResultType} from "./shared/api";
+import {QueryClient, QueryClientProvider, useInfiniteQuery} from "@tanstack/react-query";
 import {useRef, useState} from "react";
 import {useClickAway} from "react-use";
 
@@ -19,37 +19,35 @@ function Characters() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeCharacter, setActiveCharacter] = useState<ResultType>()
 
-    const {isPending, error, data} = useQuery({
+
+    const fetchData = async ({pageParam}: { pageParam: number }) => {
+        return getCharacters(pageParam)
+    }
+
+    const {data, status, error, fetchNextPage} = useInfiniteQuery({
         queryKey: ['charactersData'],
-        queryFn: () => getCharacters(1)
+        queryFn: fetchData,
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) => {
+            return allPages.length + 1
+        }
     })
 
-  /*  const loadContentOnScroll = async ({pageParams = 0}) => {
-        return await getCharacters(pageParams)
-    }*/
+    const characters = data?.pages.map((characters: Character) => { return characters.results.map(character =>
+            <li onClick={() => {
+                setIsModalOpen(true);
+                setActiveCharacter(character)
+            }}
+                className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-8 flex flex-col gap-y-4"
+                key={character.id}>
+                <img src={character.image} alt={character.name}/>
+                <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{character.name}</span>
+            </li>
+        )
+    })
 
-/*    const { data, error} = useInfiniteQuery({
-        queryKey: ['charactersData'],
-        queryFn: loadContentOnScroll,
-        getNextPageParam: loadContentOnScroll
-    })*/
-
-    if (isPending) return 'Loading'
-    if (error) return 'Error' + error.message
-
-
-
-    const characters = data?.results.map(character =>
-        <li onClick={() => {
-            setIsModalOpen(true);
-            setActiveCharacter(character)
-        }}
-            className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-8 flex flex-col gap-y-4"
-            key={character.id}>
-            <img src={character.image} alt={character.name}/>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{character.name}</span>
-        </li>
-    )
+    if (status === 'pending') {return <p>Loading</p>}
+    if (status === 'error') {return <p>{error.message}</p>}
 
     return (
         <div className="flex justify-center flex-col items-center pt-12">
@@ -57,8 +55,9 @@ function Characters() {
             <div className="grid grid-flow-col gap-6">
                 <div className="row-span-3 w-72 border-2 h-96">Фильтры</div>
                 <div className="col-span-2 h-12 border-2 p-2">Поиск</div>
-                    <ul className="grid grid-cols-3 gap-x-6 gap-y-12 w-fit m-auto row-span-2 col-span-2 mb-6">{characters}</ul>
+                <ul className="grid grid-cols-3 gap-x-6 gap-y-12 w-fit m-auto row-span-2 col-span-2 mb-6">{characters}</ul>
             </div>
+            <button onClick={() => fetchNextPage()}>Load more</button>
             {isModalOpen && activeCharacter && <Modal modalCloser={setIsModalOpen} modalContent={activeCharacter}/>}
         </div>
     )
