@@ -1,7 +1,7 @@
 import {AxiosInstance} from "./axiosinstance.ts";
 
-export const getCharacters = async (): Promise<Character> => {
-    const {data} = await AxiosInstance.get("/character").catch(e => {
+export const getCharacters = async (page: number): Promise<Character> => {
+    const {data} = await AxiosInstance.get(`/character?page=${page}`).catch(e => {
         throw new Error(`/character error ${e}`)
     });
 
