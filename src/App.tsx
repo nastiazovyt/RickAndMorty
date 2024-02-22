@@ -1,5 +1,5 @@
 import {getCharacters, ResultType} from "./shared/api";
-import {QueryClient, QueryClientProvider, useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {QueryClient, QueryClientProvider, useQuery} from "@tanstack/react-query";
 import {useRef, useState} from "react";
 import {useClickAway} from "react-use";
 
@@ -23,25 +23,21 @@ function Characters() {
         queryKey: ['charactersData'],
         queryFn: () => getCharacters(1)
     })
-/*
-    const loadContentOnScroll = async ({pageParams = 0}) => {
+
+  /*  const loadContentOnScroll = async ({pageParams = 0}) => {
         return await getCharacters(pageParams)
     }*/
 
-
-  /*  const { data, error} = useInfiniteQuery({
+/*    const { data, error} = useInfiniteQuery({
         queryKey: ['charactersData'],
         queryFn: loadContentOnScroll,
         getNextPageParam: loadContentOnScroll
-    })
-    console.log(data?.pages)*/
-
-
-
-
+    })*/
 
     if (isPending) return 'Loading'
     if (error) return 'Error' + error.message
+
+
 
     const characters = data?.results.map(character =>
         <li onClick={() => {
