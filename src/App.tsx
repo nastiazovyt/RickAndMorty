@@ -1,7 +1,8 @@
 import {Character, getCharacters, ResultType} from "./shared/api";
-import {QueryClient, QueryClientProvider, useInfiniteQuery} from "@tanstack/react-query";
-import {useRef, useState} from "react";
+import {QueryClient, QueryClientProvider, useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {useEffect, useRef, useState} from "react";
 import {useClickAway} from "react-use";
+import {list} from "postcss";
 
 const queryClient = new QueryClient()
 
@@ -18,6 +19,7 @@ function App() {
 function Characters() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeCharacter, setActiveCharacter] = useState<ResultType>()
+    const [searchResult, setSearchResult] = useState('')
 
 
     const fetchData = async ({pageParam}: { pageParam: number }) => {
@@ -33,7 +35,8 @@ function Characters() {
         }
     })
 
-    const characters = data?.pages.map((characters: Character) => { return characters.results.map(character =>
+    const characters = data?.pages.map((characters: Character) => {
+        return characters.results.map(character =>
             <li onClick={() => {
                 setIsModalOpen(true);
                 setActiveCharacter(character)
@@ -46,15 +49,25 @@ function Characters() {
         )
     })
 
-    if (status === 'pending') {return <p>Loading</p>}
-    if (status === 'error') {return <p>{error.message}</p>}
+    if (status === 'pending') {
+        return <p>Loading</p>
+    }
+    if (status === 'error') {
+        return <p>{error.message}</p>
+    }
+
+
+    const handleNameChange = (searchResult) => {
+        setSearchResult(searchResult)
+    }
 
     return (
         <div className="flex justify-center flex-col items-center pt-12">
             <h1 className="pt-6 mb-12 font-raleway leading-3 text-green-900 text-5xl font-extrabold">Characters</h1>
             <div className="grid grid-flow-col gap-6">
                 <div className="row-span-3 w-72 border-2 h-96">Фильтры</div>
-                <div className="col-span-2 h-12 border-2 p-2">Поиск</div>
+                <SearchBox onChange={handleNameChange}/>
+                <span>{searchResult}</span>
                 <ul className="grid grid-cols-3 gap-x-6 gap-y-12 w-fit m-auto row-span-2 col-span-2 mb-6">{characters}</ul>
             </div>
             <button onClick={() => fetchNextPage()}>Load more</button>
@@ -128,6 +141,60 @@ function Modal({modalContent, modalCloser}: { modalContent: ResultType; modalClo
         </div>
 
     )
+}
+
+function Result({data}: Character) {
+    return (
+        data?.results?.map(result =>
+        <li key={result.id}>{result.name}</li>
+        )
+    )
+}
+
+function SearchBox({onChange}) {
+    const [search, setSearch] = useState('')
+    const debounceSearchTerm = useDebounce(search, 200)
+
+    const {data} = useQuery({
+        queryKey: ['search', debounceSearchTerm],
+        queryFn: () => {
+            if (debounceSearchTerm) {
+                return fetch(`https://rickandmortyapi.com/api/character/?name=${debounceSearchTerm}`).then(res => res.json())
+            }
+            return []
+        }
+    })
+
+    const handleNameChange = (e) => {
+        onChange(e.target.value)
+    }
+
+    return (
+        <div className="col-span-2 h-12 border-2 p-2">
+            <input className="focus:outline-none w-full" type="search" placeholder="Enter your search term here"
+                // value={search} onChange={(e) => setSearch(e.target.value)}/>
+                   value={search} onChange={(e) => {
+                setSearch(e.target.value);
+                handleNameChange(e)
+            }}/>
+            {data && <Result data={data}/>}
+        </div>
+    )
+}
+
+function useDebounce(value: string, delay: number) {
+    const [debouncedValue, setDebouncedValue] = useState(value)
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value)
+
+        }, delay)
+        return () => {
+            clearTimeout(handler)
+        }
+    }, [value, delay])
+    return debouncedValue
 }
 
 export default App
