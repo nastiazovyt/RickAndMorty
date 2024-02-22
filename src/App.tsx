@@ -2,7 +2,6 @@ import {Character, getCharacters, ResultType} from "./shared/api";
 import {QueryClient, QueryClientProvider, useInfiniteQuery, useQuery} from "@tanstack/react-query";
 import {useEffect, useRef, useState} from "react";
 import {useClickAway} from "react-use";
-import {list} from "postcss";
 
 const queryClient = new QueryClient()
 
@@ -20,7 +19,6 @@ function Characters() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeCharacter, setActiveCharacter] = useState<ResultType>()
     const [searchResult, setSearchResult] = useState('')
-
 
     const fetchData = async ({pageParam}: { pageParam: number }) => {
         return getCharacters(pageParam)
@@ -56,9 +54,20 @@ function Characters() {
         return <p>{error.message}</p>
     }
 
+    const changeSearchData = (searchResult: Character) => {
+        const searchCharacters = searchResult?.results?.map(results => {
+            return <li onClick={() => {
+                setIsModalOpen(true);
+                setActiveCharacter(results)
+            }}
+                       className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-8 flex flex-col gap-y-4"
+                       key={results.id}>
+                <img src={results.image} alt={results.name}/>
+                <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{results.name}</span>
+            </li>
+        })
 
-    const handleNameChange = (searchResult) => {
-        setSearchResult(searchResult)
+        setSearchResult(searchCharacters)
     }
 
     return (
@@ -66,8 +75,8 @@ function Characters() {
             <h1 className="pt-6 mb-12 font-raleway leading-3 text-green-900 text-5xl font-extrabold">Characters</h1>
             <div className="grid grid-flow-col gap-6">
                 <div className="row-span-3 w-72 border-2 h-96">Фильтры</div>
-                <SearchBox onChange={handleNameChange}/>
-                <span>{searchResult}</span>
+                <SearchBox onChange={changeSearchData}/>
+                <ul>{searchResult}</ul>
                 <ul className="grid grid-cols-3 gap-x-6 gap-y-12 w-fit m-auto row-span-2 col-span-2 mb-6">{characters}</ul>
             </div>
             <button onClick={() => fetchNextPage()}>Load more</button>
@@ -143,14 +152,6 @@ function Modal({modalContent, modalCloser}: { modalContent: ResultType; modalClo
     )
 }
 
-function Result({data}: Character) {
-    return (
-        data?.results?.map(result =>
-        <li key={result.id}>{result.name}</li>
-        )
-    )
-}
-
 function SearchBox({onChange}) {
     const [search, setSearch] = useState('')
     const debounceSearchTerm = useDebounce(search, 200)
@@ -165,19 +166,17 @@ function SearchBox({onChange}) {
         }
     })
 
-    const handleNameChange = (e) => {
-        onChange(e.target.value)
+    const changeSearchData = (data: Character) => {
+        onChange(data)
     }
 
     return (
         <div className="col-span-2 h-12 border-2 p-2">
             <input className="focus:outline-none w-full" type="search" placeholder="Enter your search term here"
-                // value={search} onChange={(e) => setSearch(e.target.value)}/>
                    value={search} onChange={(e) => {
                 setSearch(e.target.value);
-                handleNameChange(e)
+                changeSearchData(data)
             }}/>
-            {data && <Result data={data}/>}
         </div>
     )
 }
