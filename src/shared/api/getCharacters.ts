@@ -1,41 +1,41 @@
 import {AxiosInstance} from "./axiosinstance.ts";
 
-export const getCharacters = async (page: number) => {
-    const {data} = await AxiosInstance.get(`/character/?page=${page}`).catch(e => {
+export const getCharacters = async (name: string, page: number) => {
+    const {data} = await AxiosInstance.get(`/character/?page=${page}&name=${name}`).catch(e => {
         throw new Error(`/character error ${e}`)
     });
 
     return data
 }
 
-export type Character = {
-    info: InfoType,
-    results: ResultType[]
+export type CharacterResponse = {
+    info: Info,
+    results: Character[]
 }
 
-export type InfoType = {
+export type Info = {
     count: number,
     next: string | null,
     pages: number,
     prev: string | null
 }
 
-export type ResultType = {
+export type Character = {
     id: number,
     name: string,
     status: string,
     species: string,
     type: string,
     gender: string,
-    origin: LocationType,
-    location: LocationType,
+    origin: Location,
+    location: Location,
     image: string,
     episode: string[],
     url: string,
     created: string
 }
 
-export type LocationType = {
+export type Location = {
     name: string,
     url: string
 }
