@@ -13,7 +13,7 @@ const audio = new Audio(errorSound)
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <Characters/>
+            <MainContent/>
         </QueryClientProvider>
     )
 }
@@ -36,7 +36,7 @@ function CharacterCard({character, handlers}: {
     )
 }
 
-function Characters() {
+function MainContent() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeCharacter, setActiveCharacter] = useState<Character>()
     const [searchValueName, setSearchValueName] = useState('')
@@ -94,22 +94,23 @@ function Characters() {
     }, [inView, hasNextPage, fetchNextPage, isError]);
 
 
-
     return (
         <div className="pt-6 flex justify-center flex-col items-center mb-6">
             <h1 className="mb-8 font-raleway text-green-900 text-5xl font-extrabold">Characters</h1>
             <div className="flex flex-row gap-6">
                 <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2 relative">
-                    <span className="text-green-800 font-bold absolute -top-12 text-center -left-10 -rotate-12 block bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
+                    <span
+                        className="text-green-800 font-bold absolute -top-12 text-center -left-10 -rotate-12 block bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
                     <TextInputComponent onInput={setSearchValueName} inputValue={searchValueName}
                                         placeholder={'Enter the name here'} label={'Name'}/>
                     <TextInputComponent onInput={setSearchValueType} inputValue={searchValueType}
                                         placeholder={'Enter the type here'} label={'Type'}/>
                     <TextInputComponent onInput={setSearchValueSpecies} inputValue={searchValueSpecies}
                                         placeholder={'Enter the species here'} label={'Species'}/>
-                    <DropdownComponent oninput={setSearchValueGender}  label={'Gender'} options={['male', 'female', 'genderless', 'unknown']}/>
+                    <DropdownComponent oninput={setSearchValueGender} label={'Gender'}
+                                       options={['male', 'female', 'genderless', 'unknown']}/>
                     <DropdownComponent oninput={setSearchValueStatus}
-                                       options={ ['alive', 'dead ', 'unknown']} label={'Status'}/>
+                                       options={['alive', 'dead ', 'unknown']} label={'Status'}/>
                 </div>
                 <div className="w-[62rem]">
                     {status === 'pending' && <span className='font-raleway'>loading data...</span>}
