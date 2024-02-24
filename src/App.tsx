@@ -4,7 +4,7 @@ import {useEffect, useRef, useState} from "react";
 import {useClickAway} from "react-use";
 import {useInView} from "react-intersection-observer";
 import {useDebounce} from "./shared/helpers";
-import errorSound from '../public/error.mp3'
+import errorSound from '../src/assets/error.mp3'
 
 const queryClient = new QueryClient()
 
@@ -62,7 +62,7 @@ function Characters() {
     const debounceSearchTermType = useDebounce(searchValueType, 200)
     const debounceSearchTermSpecies = useDebounce(searchValueSpecies, 200)
 
-    const {data, status, fetchNextPage, hasNextPage, isFetchingNextPage} = useInfiniteQuery({
+    const {data, status, fetchNextPage, hasNextPage, isFetchingNextPage, isError} = useInfiniteQuery({
         queryKey: ['charactersData', {
             name: debounceSearchTermName,
             type: debounceSearchTermType,
@@ -90,15 +90,17 @@ function Characters() {
         if (inView && hasNextPage) {
             void fetchNextPage()
         }
-    }, [inView, hasNextPage, fetchNextPage]);
+        if (isError) void audio.play()
+    }, [inView, hasNextPage, fetchNextPage, isError]);
 
-    if (status === 'error') audio.play()
+
 
     return (
         <div className="pt-6 flex justify-center flex-col items-center mb-6">
             <h1 className="mb-8 font-raleway text-green-900 text-5xl font-extrabold">Characters</h1>
             <div className="flex flex-row gap-6">
-                <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2">
+                <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2 relative">
+                    <span className="text-green-800 font-bold absolute -top-12 text-center -left-10 -rotate-12 block bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
                     <TextInputComponent onInput={setSearchValueName} inputValue={searchValueName}
                                         placeholder={'Enter the name here'} label={'Name'}/>
                     <TextInputComponent onInput={setSearchValueType} inputValue={searchValueType}
@@ -111,7 +113,7 @@ function Characters() {
                 </div>
                 <div className="w-[62rem]">
                     {status === 'pending' && <span className='font-raleway'>loading data...</span>}
-                    {status === 'error' &&
+                    {isError &&
                         <span className='font-raleway'>oops, something went wrong <br/> try changing the search parameters</span>}
                     {status === 'success' &&
                         <div className="flex items-center flex-col">
