@@ -13,7 +13,7 @@ const audio = new Audio(errorSound)
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <MainContent/>
+            <Characters/>
             {/*<Locations/>*/}
         </QueryClientProvider>
     )
@@ -40,7 +40,27 @@ function CharacterCard({character, handlers}: {
     )
 }
 
-function MainContent() {
+const fetchCharactersData = async ({name, pageParam, type, species, gender, status}: {
+    name: string,
+    pageParam: number,
+    type: string,
+    species: string,
+    gender: string,
+    status: string
+}): Promise<CharacterResponse> => {
+    return getCharacters(name, pageParam, type, species, gender, status)
+}
+
+const fetchLocationsData = async ({name, pageParam, type, dimension,}: {
+    name: string,
+    pageParam: number,
+    type: string,
+    dimension: string,
+}): Promise<LocationResponse> => {
+    return getLocations(name, pageParam, type, dimension)
+}
+
+function Characters() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeCharacter, setActiveCharacter] = useState<Character>()
     const [searchValueName, setSearchValueName] = useState('')
@@ -50,17 +70,6 @@ function MainContent() {
     const [searchValueStatus, setSearchValueStatus] = useState('')
 
     const {ref, inView} = useInView({});
-
-    const fetchData = async ({name, pageParam, type, species, gender, status}: {
-        name: string,
-        pageParam: number,
-        type: string,
-        species: string,
-        gender: string,
-        status: string
-    }): Promise<CharacterResponse> => {
-        return getCharacters(name, pageParam, type, species, gender, status)
-    }
 
     const debounceSearchTermName = useDebounce(searchValueName, 200)
     const debounceSearchTermType = useDebounce(searchValueType, 200)
@@ -74,7 +83,7 @@ function MainContent() {
             gender: searchValueGender,
             status: searchValueStatus
         }],
-        queryFn: ({pageParam}) => fetchData({
+        queryFn: ({pageParam}) => fetchCharactersData({
             name: debounceSearchTermName,
             pageParam,
             type: debounceSearchTermType,
@@ -227,15 +236,6 @@ function MainContent() {
 
     const {ref, inView} = useInView({});
 
-    const fetchData = async ({name, pageParam, type, dimension,}: {
-        name: string,
-        pageParam: number,
-        type: string,
-        dimension: string,
-    }): Promise<LocationResponse> => {
-        return getLocations(name, pageParam, type, dimension)
-    }
-
     const debounceSearchTermName = useDebounce(searchValueName, 200)
     const debounceSearchTermType = useDebounce(searchValueType, 200)
 
@@ -379,6 +379,5 @@ function MainContent() {
         </div>
     )
 }*/
-
 
 export default App
