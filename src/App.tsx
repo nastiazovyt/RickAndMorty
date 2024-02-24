@@ -1,10 +1,14 @@
 import {CharacterResponse, getCharacters, Character} from "./shared/api";
-import {keepPreviousData, QueryClient, QueryClientProvider, useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {keepPreviousData, QueryClient, QueryClientProvider, useInfiniteQuery} from "@tanstack/react-query";
 import {useEffect, useRef, useState} from "react";
 import {useClickAway} from "react-use";
 import {useInView} from "react-intersection-observer";
+import {useDebounce} from "./shared/helpers";
+import errorSound from '../public/error.mp3'
 
 const queryClient = new QueryClient()
+
+const audio = new Audio(errorSound)
 
 function App() {
     return (
@@ -14,13 +18,17 @@ function App() {
     )
 }
 
-function CharacterCard({character, handlers}: { character: Character, handlers: {chooseCharacter: (character: Character) => void, setModalActive: (isActive: boolean) => void} }) {
+function CharacterCard({character, handlers}: {
+    character: Character,
+    handlers: { chooseCharacter: (character: Character) => void, setModalActive: (isActive: boolean) => void }
+}) {
     const onClickHandler = () => {
         handlers.chooseCharacter(character)
         handlers.setModalActive(true)
     }
     return (
-        <li onClick={onClickHandler} className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-8 flex flex-col gap-y-4"
+        <li onClick={onClickHandler}
+            className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-8 flex flex-col gap-y-4"
             key={character.id}>
             <img className="w-80 h-auto" src={character.image} alt={character.name}/>
             <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{character.name}</span>
@@ -31,20 +39,47 @@ function CharacterCard({character, handlers}: { character: Character, handlers: 
 function Characters() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeCharacter, setActiveCharacter] = useState<Character>()
-    const [searchValue, setSearchValue] = useState('')
+    const [searchValueName, setSearchValueName] = useState('')
+    const [searchValueType, setSearchValueType] = useState('')
+    const [searchValueSpecies, setSearchValueSpecies] = useState('')
+    const [searchValueGender, setSearchValueGender] = useState('')
+    const [searchValueStatus, setSearchValueStatus] = useState('')
 
     const {ref, inView} = useInView({});
 
-    const fetchData = async ({name, pageParam}: { name: string, pageParam: number }): Promise<CharacterResponse> => {
-        return getCharacters(name, pageParam)
+    const fetchData = async ({name, pageParam, type, species, gender, status}: {
+        name: string,
+        pageParam: number,
+        type: string,
+        species: string,
+        gender: string,
+        status: string
+    }): Promise<CharacterResponse> => {
+        return getCharacters(name, pageParam, type, species, gender, status)
     }
 
-    const debounceSearchTerm = useDebounce(searchValue, 200)
+    const debounceSearchTermName = useDebounce(searchValueName, 200)
+    const debounceSearchTermType = useDebounce(searchValueType, 200)
+    const debounceSearchTermSpecies = useDebounce(searchValueSpecies, 200)
 
-    const {data, status, error, fetchNextPage, hasNextPage, isFetchingNextPage} = useInfiniteQuery({
-        queryKey: ['charactersData', {name: debounceSearchTerm}],
-        queryFn: ({pageParam}) => fetchData({name: debounceSearchTerm, pageParam}),
+    const {data, status, fetchNextPage, hasNextPage, isFetchingNextPage} = useInfiniteQuery({
+        queryKey: ['charactersData', {
+            name: debounceSearchTermName,
+            type: debounceSearchTermType,
+            species: debounceSearchTermSpecies,
+            gender: searchValueGender,
+            status: searchValueStatus
+        }],
+        queryFn: ({pageParam}) => fetchData({
+            name: debounceSearchTermName,
+            pageParam,
+            type: debounceSearchTermType,
+            species: debounceSearchTermSpecies,
+            gender: searchValueGender,
+            status: searchValueStatus
+        }),
         initialPageParam: 1,
+        retry: 0,
         placeholderData: keepPreviousData,
         getNextPageParam: (lastPage, allPages) => {
             return lastPage.info.next ? allPages.length + 1 : undefined
@@ -57,27 +92,40 @@ function Characters() {
         }
     }, [inView, hasNextPage, fetchNextPage]);
 
-    /*    if (status === 'pending') {
-            return <p>Loading</p>
-        }
-        if (status === 'error') {
-            return <p>{error.message}</p>
-        }*/
+    if (status === 'error') audio.play()
 
     return (
-        <div className="flex justify-center flex-col items-center mb-6">
-            <h1 className="pt-6 mb-8 font-raleway text-green-900 text-5xl font-extrabold">Characters</h1>
-            <div className="grid grid-flow-col gap-6">
-                <div className="row-span-3 w-72 border-2 h-96">Фильтры</div>
-                <SearchBox onInput={setSearchValue} inputValue={searchValue}/>
-                <div className="flex items-center flex-col row-span-2 col-span-2">
-                    <ul className="grid grid-cols-3 gap-x-6 gap-y-8 w-fit m-auto  mb-6">{
-                        data && data.pages.map(page => {
-                            return page.results.map(character => <CharacterCard key={character.id} handlers={{chooseCharacter: setActiveCharacter, setModalActive: setIsModalOpen}} character={character}/>)
-                        })
-                    }</ul>
-                    <span className="font-raleway"
-                          ref={ref}>{!hasNextPage ? 'nothing to load, this is the end =(' : isFetchingNextPage ? 'loading data...' : ''}</span>
+        <div className="pt-6 flex justify-center flex-col items-center mb-6">
+            <h1 className="mb-8 font-raleway text-green-900 text-5xl font-extrabold">Characters</h1>
+            <div className="flex flex-row gap-6">
+                <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2">
+                    <TextInputComponent onInput={setSearchValueName} inputValue={searchValueName}
+                                        placeholder={'Enter the name here'} label={'Name'}/>
+                    <TextInputComponent onInput={setSearchValueType} inputValue={searchValueType}
+                                        placeholder={'Enter the type here'} label={'Type'}/>
+                    <TextInputComponent onInput={setSearchValueSpecies} inputValue={searchValueSpecies}
+                                        placeholder={'Enter the species here'} label={'Species'}/>
+                    <DropdownComponent oninput={setSearchValueGender}  label={'Gender'} options={['male', 'female', 'genderless', 'unknown']}/>
+                    <DropdownComponent oninput={setSearchValueStatus}
+                                       options={ ['alive', 'dead ', 'unknown']} label={'Status'}/>
+                </div>
+                <div className="w-[62rem]">
+                    {status === 'pending' && <span className='font-raleway'>loading data...</span>}
+                    {status === 'error' &&
+                        <span className='font-raleway'>oops, something went wrong <br/> try changing the search parameters</span>}
+                    {status === 'success' &&
+                        <div className="flex items-center flex-col">
+                            <ul className="grid grid-cols-3 gap-x-6 gap-y-8 m-auto mb-6">{
+                                data && data.pages.map(page => {
+                                    return page.results.map(character => <CharacterCard key={character.id} handlers={{
+                                        chooseCharacter: setActiveCharacter,
+                                        setModalActive: setIsModalOpen
+                                    }} character={character}/>)
+                                })
+                            }</ul>
+                            <span className="font-raleway"
+                                  ref={ref}>{!hasNextPage ? 'nothing to load, this is the end =(' : isFetchingNextPage ? 'loading data...' : ''}</span>
+                        </div>}
                 </div>
             </div>
             {isModalOpen && activeCharacter && <Modal modalCloser={setIsModalOpen} modalContent={activeCharacter}/>}
@@ -90,7 +138,6 @@ function Modal({modalContent, modalCloser}: { modalContent: Character; modalClos
     useClickAway(modalRef, () => {
         modalCloser(false)
     })
-
 
     return (
         <div className="fixed h-dvh w-dvw top-0 left-0 z-20 font-raleway">
@@ -176,35 +223,43 @@ function Modal({modalContent, modalCloser}: { modalContent: Character; modalClos
                 </div>
             </div>
         </div>
-
     )
 }
 
-function SearchBox({onInput, inputValue}: { onInput: (inputValue: string) => void, inputValue: string }) {
+function TextInputComponent({onInput, inputValue, placeholder, label}: {
+    onInput: (inputValue: string) => void,
+    inputValue: string,
+    placeholder: string,
+    label: string
+}) {
     return (
-        <div className="col-span-2 h-12 border-2 p-2">
-            <input className="focus:outline-none w-full font-raleway" type="search"
-                   placeholder="Enter your search term here"
+        <label className='flex-col flex gap-y-1.5'>
+            <span className='font-raleway text-green-800 font-bold'>{label}</span>
+            <input className="focus:outline-none w-full font-raleway h-12 border-2 p-2 rounded-md" type="search"
+                   placeholder={placeholder}
                    value={inputValue} onChange={(e) => {
                 onInput(e.target.value);
             }}/>
-        </div>
+        </label>
     )
 }
 
-function useDebounce(value: string, delay: number) {
-    const [debouncedValue, setDebouncedValue] = useState(value)
-
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedValue(value)
-
-        }, delay)
-        return () => {
-            clearTimeout(handler)
-        }
-    }, [value, delay])
-    return debouncedValue
+function DropdownComponent({options, oninput, label}: {
+    options: string[],
+    oninput: (inputValue: string) => void,
+    label: string
+}) {
+    return (
+        <label className='flex-col flex gap-y-1.5'>
+            <span className='font-raleway text-green-800 font-bold'>{label}</span>
+            <select className="focus:outline-none w-full font-raleway h-12 border-2 p-2 rounded-md" onChange={(e) => {
+                oninput(e.target.value)
+            }}>
+                <option value="">any</option>
+                {options.map(option => <option key={option} value={option}>{option}</option>)}
+            </select>
+        </label>
+    )
 }
 
 export default App
