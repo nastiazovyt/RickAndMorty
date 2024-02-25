@@ -1,10 +1,23 @@
-import {CharacterResponse, getCharacters, Character, getLocations, LocationResponse, Location} from "./shared/api";
-import {TextInputComponent, DropdownComponent, ModalComponent} from "./shared/ui";
-import {keepPreviousData, QueryClient, QueryClientProvider, useInfiniteQuery} from "@tanstack/react-query";
-import {useEffect, useState} from "react";
-import {useInView} from "react-intersection-observer";
-import {useDebounce} from "./shared/helpers";
+import {Character, Location, Episode} from './shared/types.ts'
+import {
+    TextInputComponent,
+    DropdownComponent,
+    ModalComponent,
+    EpisodeCard,
+    LocationCard,
+    CharacterCard
+} from "./shared/ui";
+import {keepPreviousData, QueryClient, QueryClientProvider, useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {SetStateAction, useEffect, useState} from "react";
+import {
+    useDebounce,
+    fetchEpisodesData,
+    fetchCharactersData,
+    fetchLocationsData,
+    fetchMultipleCharactersData
+} from "./shared/helpers";
 import errorSound from '../src/assets/error.mp3'
+import {CardsGrid} from "./shared/ui/cardsGrid.tsx";
 
 const queryClient = new QueryClient()
 
@@ -13,51 +26,45 @@ const audio = new Audio(errorSound)
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <Characters/>
-            {/*<Locations/>*/}
+            <Content/>
         </QueryClientProvider>
     )
 }
 
-function CharacterCard({character, handlers}: {
-    character: Character,
-    handlers: {
-        chooseCharacter: (character: Character) => void,
-        setModalActive: (isActive: boolean) => void
-    }
-}) {
-    const onClickHandler = () => {
-        handlers.chooseCharacter(character)
-        handlers.setModalActive(true)
+function Content() {
+    const [value, setValue] = useState('Characters');
+
+    const changeValue = (e: { target: { value: SetStateAction<string> } }) => {
+        setValue(e.target.value)
     }
     return (
-        <li onClick={onClickHandler}
-            className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-8 flex flex-col gap-y-4"
-            key={character.id}>
-            <img className="w-80 h-auto" src={character.image} alt={character.name}/>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{character.name}</span>
-        </li>
+        <div>
+            <div className="flex flex-row justify-between w-80">
+                <label className="flex flex-row gap-x-2">
+                    <input className="accent-yellow-100" type="radio" value="Characters"
+                           checked={value === 'Characters'}
+                           onChange={changeValue}/>
+                    <span className="font-raleway text-green-900 font-bold">Characters</span>
+                </label>
+                <label className="flex flex-row gap-x-2">
+                    <input className="accent-yellow-100" type="radio" value="Locations"
+                           checked={value === 'Locations'}
+                           onChange={changeValue}/>
+                    <span className="font-raleway text-green-900 font-bold">Locations</span>
+                </label>
+                <label className="flex flex-row gap-x-2">
+                    <input className="accent-yellow-100" type="radio" value="Episodes"
+                           checked={value === 'Episodes'}
+                           onChange={changeValue}/>
+                    <span className="font-raleway text-green-900 font-bold">Episodes</span>
+                </label>
+            </div>
+            <h1 className="mb-8 font-raleway text-green-900 text-5xl font-extrabold">{value}</h1>
+            {value === 'Characters' && <Characters/>}
+            {value === 'Locations' && <Locations/>}
+            {value === 'Episodes' && <Episodes/>}
+        </div>
     )
-}
-
-const fetchCharactersData = async ({name, pageParam, type, species, gender, status}: {
-    name: string,
-    pageParam: number,
-    type: string,
-    species: string,
-    gender: string,
-    status: string
-}): Promise<CharacterResponse> => {
-    return getCharacters(name, pageParam, type, species, gender, status)
-}
-
-const fetchLocationsData = async ({name, pageParam, type, dimension,}: {
-    name: string,
-    pageParam: number,
-    type: string,
-    dimension: string,
-}): Promise<LocationResponse> => {
-    return getLocations(name, pageParam, type, dimension)
 }
 
 function Characters() {
@@ -68,8 +75,6 @@ function Characters() {
     const [searchValueSpecies, setSearchValueSpecies] = useState('')
     const [searchValueGender, setSearchValueGender] = useState('')
     const [searchValueStatus, setSearchValueStatus] = useState('')
-
-    const {ref, inView} = useInView({});
 
     const debounceSearchTermName = useDebounce(searchValueName, 200)
     const debounceSearchTermType = useDebounce(searchValueType, 200)
@@ -100,15 +105,11 @@ function Characters() {
     })
 
     useEffect(() => {
-        if (inView && hasNextPage) {
-            void fetchNextPage()
-        }
         if (isError) void audio.play()
-    }, [inView, hasNextPage, fetchNextPage, isError]);
+    }, [isError]);
 
     return (
         <div className="pt-6 flex justify-center flex-col items-center mb-6">
-            <h1 className="mb-8 font-raleway text-green-900 text-5xl font-extrabold">Characters</h1>
             <div className="flex flex-row gap-6">
                 <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2 relative">
                     <span
@@ -124,24 +125,15 @@ function Characters() {
                     <DropdownComponent oninput={setSearchValueStatus}
                                        options={['alive', 'dead ', 'unknown']} label={'Status'}/>
                 </div>
-                <div className="w-[62rem]">
-                    {status === 'pending' && <span className='font-raleway'>loading data...</span>}
-                    {isError &&
-                        <span className='font-raleway'>oops, something went wrong <br/> try changing the search parameters</span>}
-                    {status === 'success' &&
-                        <div className="flex items-center flex-col">
-                            <ul className="grid grid-cols-3 gap-x-6 gap-y-8 m-auto mb-6">{
-                                data && data.pages.map(page => {
-                                    return page.results.map(character => <CharacterCard key={character.id} handlers={{
-                                        chooseCharacter: setActiveCharacter,
-                                        setModalActive: setIsModalOpen
-                                    }} character={character}/>)
-                                })
-                            }</ul>
-                            <span className="font-raleway"
-                                  ref={ref}>{!hasNextPage ? 'nothing to load, this is the end =(' : isFetchingNextPage ? 'loading data...' : ''}</span>
-                        </div>}
-                </div>
+                <CardsGrid status={status} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage}
+                           fetchFunction={async () => void fetchNextPage()}>{
+                    data && data.pages.map(page => {
+                        return page.results.map(character => <CharacterCard key={character.id} handlers={{
+                            chooseActiveCard: setActiveCharacter,
+                            setModalActive: setIsModalOpen
+                        }} character={character}/>)
+                    })
+                }</CardsGrid>
             </div>
             {isModalOpen && activeCharacter && <ModalComponent modalCloser={setIsModalOpen}>
                 <div>
@@ -227,14 +219,12 @@ function Characters() {
     )
 }
 
-/*function Locations() {
+function Locations() {
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [activeCharacter, setActiveCharacter] = useState<Character>()
+    const [activeLocation, setActiveLocation] = useState<Location>()
     const [searchValueName, setSearchValueName] = useState('')
     const [searchValueType, setSearchValueType] = useState('')
     const [searchValueDimensions, setSearchValueDimensions] = useState('')
-
-    const {ref, inView} = useInView({});
 
     const debounceSearchTermName = useDebounce(searchValueName, 200)
     const debounceSearchTermType = useDebounce(searchValueType, 200)
@@ -245,7 +235,7 @@ function Characters() {
             type: debounceSearchTermType,
             dimension: searchValueDimensions
         }],
-        queryFn: ({pageParam}) => fetchData({
+        queryFn: ({pageParam}) => fetchLocationsData({
             name: debounceSearchTermName,
             pageParam,
             type: debounceSearchTermType,
@@ -260,15 +250,11 @@ function Characters() {
     })
 
     useEffect(() => {
-        if (inView && hasNextPage) {
-            void fetchNextPage()
-        }
         if (isError) void audio.play()
-    }, [inView, hasNextPage, fetchNextPage, isError]);
+    }, [isError]);
 
     return (
         <div className="pt-6 flex justify-center flex-col items-center mb-6">
-            <h1 className="mb-8 font-raleway text-green-900 text-5xl font-extrabold">Locations</h1>
             <div className="flex flex-row gap-6">
                 <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2 relative">
                     <span
@@ -278,106 +264,118 @@ function Characters() {
                     <TextInputComponent onInput={setSearchValueType} inputValue={searchValueType}
                                         placeholder={'Enter the type here'} label={'Type'}/>
                     <TextInputComponent onInput={setSearchValueDimensions} inputValue={searchValueDimensions}
-                                        placeholder={'Enter the dimensions here'} label={'Species'}/>
+                                        placeholder={'Enter the species here'} label={'Species'}/>
                 </div>
-                <div className="w-[62rem]">
-                    {status === 'pending' && <span className='font-raleway'>loading data...</span>}
-                    {isError &&
-                        <span className='font-raleway'>oops, something went wrong <br/> try changing the search parameters</span>}
-                    {status === 'success' &&
-                        <div className="flex items-center flex-col">
-                            <ul className="grid grid-cols-3 gap-x-6 gap-y-8 m-auto mb-6">{
-                                data && data.pages.map(page => {
-                                    return page.results.map(location => <LocationCard key={location.id} handlers={{
-                                        chooseLocation: setActiveCharacter,
-                                        setModalActive: setIsModalOpen
-                                    }} location={location}/>)
-                                })
-                            }</ul>
-                            <span className="font-raleway"
-                                  ref={ref}>{!hasNextPage ? 'nothing to load, this is the end =(' : isFetchingNextPage ? 'loading data...' : ''}</span>
-                        </div>}
-                </div>
+                <CardsGrid status={status} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage}
+                           fetchFunction={async () => void fetchNextPage()}>{
+                    data && data.pages.map(page => {
+                        return page.results.map(location => <LocationCard key={location.id} handlers={{
+                            chooseActiveCard: setActiveLocation,
+                            setModalActive: setIsModalOpen
+                        }} location={location}/>)
+                    })
+                }</CardsGrid>
             </div>
-            {isModalOpen && activeCharacter && <ModalComponent modalCloser={setIsModalOpen} children={<div className="grid grid-rows-2 grid-cols-2 gap-x-12 gap-y-16">
-                <img className="rounded-2xl w-[24rem] h-[24rem]" src={activeCharacter.image}
-                     alt={activeCharacter.name}/>
-                <div className="flex-col flex border-2 border-green-950 p-6 w-96">
-                            <span
-                                className="text-4xl font-bold text-green-950 mb-1.5 underline">{activeCharacter.name}</span>
-                    <span className="mb-12 text-md">{activeCharacter.status}</span>
-                    <ul className="flex text-lg flex-col mt-auto leading-6">
-                        {
-                            activeCharacter.type &&
-                            <li className="flex gap-x-3">
-                                <span className="text-green-900 font-bold">type:</span>
-                                <span>{activeCharacter.type}</span>
-                            </li>
-                        }
-                        <li className="flex gap-x-3">
-                            <span className="text-green-900 font-bold">gender:</span>
-                            <span>{activeCharacter.gender}</span>
-                        </li>
-                        <li className="flex gap-x-3">
-                            <span className="text-green-900 font-bold">species:</span>
-                            <span>{activeCharacter.species}</span>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <span className="text-2xl font-bold text-green-950 block mb-3">Episodes:</span>
-                    <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto">
-                        <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                        </li>
-                        <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                        </li>
-                        <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                        </li>
-                        <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                        </li>
-                        <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                        </li>
-                        <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                        </li>
-                        <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                        </li>
-                        <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                        </li>
-                    </ul>
-                </div>
-                <div className="">
-                    <span className="text-2xl font-bold text-green-950 mb-3 block">Locations:</span>
-                    <ul className="flex flex-col gap-y-6">
-                        <li className="flex flex-col text-lg">
-                            <span className="text-green-900 font-bold">last known location:</span>
-                            <span>{activeCharacter.location.name}</span>
-                        </li>
-                        <li className="flex flex-col text-lg">
-                            <span className="text-green-900 font-bold">origin location:</span>
-                            <span>{activeCharacter.origin.name}</span>
-                        </li>
-                    </ul>
-                </div>
+            {isModalOpen && activeLocation && <ModalComponent modalCloser={setIsModalOpen} children={<div
+                className="grid grid-rows-2 grid-cols-2 gap-x-12 gap-y-16">
+                {activeLocation.name}
             </div>
             }/>}
         </div>
     )
-}*/
+}
+
+function Episodes() {
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [activeEpisode, setActiveEpisode] = useState<Episode>()
+    const [searchValueName, setSearchValueName] = useState('')
+    const [searchValueAirDate, setSearchValueAirDate] = useState('')
+    const [searchValueEpisode, setSearchValueEpisode] = useState('')
+    const [activeEpisodeCharacters, setActiveEpisodeCharacters] = useState<string[]>([])
+
+    const debounceSearchTermName = useDebounce(searchValueName, 200)
+    const debounceSearchTermAirDate = useDebounce(searchValueAirDate, 200)
+    const debounceSearchTermEpisode = useDebounce(searchValueEpisode, 200)
+
+    const {data, status, fetchNextPage, hasNextPage, isFetchingNextPage, isError} = useInfiniteQuery({
+        queryKey: ['episodeData', {
+            name: debounceSearchTermName,
+            air_date: debounceSearchTermAirDate,
+            dimension: debounceSearchTermEpisode
+        }],
+        queryFn: ({pageParam}) => fetchEpisodesData({
+            name: debounceSearchTermName,
+            pageParam,
+            air_date: debounceSearchTermAirDate,
+            episode: debounceSearchTermEpisode
+        }),
+        initialPageParam: 1,
+        retry: 0,
+        placeholderData: keepPreviousData,
+        getNextPageParam: (lastPage, allPages) => {
+            return lastPage.info.next ? allPages.length + 1 : undefined
+        }
+    })
+
+
+    const {data: activeCharacters} = useQuery({
+        queryKey: ['episodeCharactersData', activeEpisodeCharacters],
+        queryFn: () => fetchMultipleCharactersData(activeEpisodeCharacters),
+    })
+
+    console.log(activeCharacters)
+
+
+    useEffect(() => {
+        if (isError) void audio.play()
+    }, [isError]);
+
+
+    const setActive = (episode: Episode) => {
+        setActiveEpisode(episode)
+        setActiveEpisodeCharacters(!activeEpisode
+            ? []
+            : activeEpisode.characters.reduce((acc, url) => {
+                const id = url.split('/').pop()
+                if (id) acc.push(id)
+                return acc
+            }, [] as string[])
+        )
+    }
+
+
+    return (
+        <div className="pt-6 flex justify-center flex-col items-center mb-6">
+            <div className="flex flex-row gap-6">
+                <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2 relative">
+                    <span
+                        className="text-green-800 font-bold absolute -top-12 text-center -left-10 -rotate-12 block bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
+                    <TextInputComponent onInput={setSearchValueName} inputValue={searchValueName}
+                                        placeholder={'Enter the name here'} label={'Name'}/>
+                    <TextInputComponent onInput={setSearchValueAirDate} inputValue={searchValueAirDate}
+                                        placeholder={'Enter the type here'} label={'Type'}/>
+                    <TextInputComponent onInput={setSearchValueEpisode} inputValue={searchValueEpisode}
+                                        placeholder={'Enter the species here'} label={'Species'}/>
+                </div>
+                <CardsGrid status={status} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage}
+                           fetchFunction={async () => void fetchNextPage()}>{
+                    data && data.pages.map(page => {
+                        return page.results.map(episode => <EpisodeCard key={episode.id} handlers={{
+                            chooseActiveCard: setActive,
+                            setModalActive: setIsModalOpen
+                        }} episode={episode}/>)
+                    })
+                }</CardsGrid>
+            </div>
+            {isModalOpen && activeEpisode && <ModalComponent modalCloser={setIsModalOpen} children={<div
+                className="grid grid-rows-2 grid-cols-2 gap-x-12 gap-y-16">
+                {activeEpisode.name}
+                <span>Characters:</span>
+                <ul></ul>
+            </div>
+            }/>}
+        </div>
+    )
+}
 
 export default App
