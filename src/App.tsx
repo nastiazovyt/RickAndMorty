@@ -14,7 +14,7 @@ import {
     fetchEpisodesData,
     fetchCharactersData,
     fetchLocationsData,
-    fetchMultipleCharactersData
+    fetchMultipleCharactersData, fetchMultipleEpisodesData
 } from "./shared/helpers";
 import errorSound from '../src/assets/error.mp3'
 import {CardsGrid} from "./shared/ui/cardsGrid.tsx";
@@ -39,7 +39,8 @@ function Content() {
     }
     return (
         <div className="flex flex-col gap-y-8 pt-4 w-[84rem] m-auto">
-            <div className="flex flex-row justify-center border-2 w-[inherit] bg-gray-50 text-xl h-fit p-3 gap-x-12 mb-4">
+            <div
+                className="flex flex-row justify-center border-2 w-[inherit] bg-gray-50 text-xl h-fit p-3 gap-x-12 mb-4">
                 <label className="flex flex-row gap-x-2">
                     <input className="accent-yellow-100" type="radio" value="Characters"
                            checked={value === 'Characters'}
@@ -75,6 +76,7 @@ function Characters() {
     const [searchValueSpecies, setSearchValueSpecies] = useState('')
     const [searchValueGender, setSearchValueGender] = useState('')
     const [searchValueStatus, setSearchValueStatus] = useState('')
+    const [activeCharacterEpisodeId, setActiveCharacterEpisodeId] = useState<string[]>([])
 
     const debounceSearchTermName = useDebounce(searchValueName, 200)
     const debounceSearchTermType = useDebounce(searchValueType, 200)
@@ -108,6 +110,24 @@ function Characters() {
         if (isError) void audio.play()
     }, [isError]);
 
+    const {data: activeCharacterEpisodesData} = useQuery({
+        queryKey: ['characterEpisodesData', activeCharacterEpisodeId],
+        queryFn: () => fetchMultipleEpisodesData(activeCharacterEpisodeId),
+        enabled: !!activeCharacterEpisodeId.length
+    })
+
+    const setActive = (character: Character) => {
+        setActiveCharacter(character)
+        setActiveCharacterEpisodeId(!character
+            ? []
+            : character.episode.reduce((acc, url) => {
+                const id = url.split('/').pop()
+                if (id) acc.push(id)
+                return acc
+            }, [] as string[])
+        )
+    }
+
     return (
         <div className="flex justify-center flex-col items-center mb-6">
             <div className="flex flex-row gap-6">
@@ -129,7 +149,7 @@ function Characters() {
                            fetchFunction={async () => void fetchNextPage()}>{
                     data && data.pages.map(page => {
                         return page.results.map(character => <CharacterCard key={character.id} handlers={{
-                            chooseActiveCard: setActiveCharacter,
+                            chooseActiveCard: setActive,
                             setModalActive: setIsModalOpen
                         }} character={character}/>)
                     })
@@ -162,41 +182,17 @@ function Characters() {
                                 </li>
                             </ul>
                         </div>
-                        <div>
+                        <div className="w-96">
                             <span className="text-2xl font-bold text-green-950 block mb-3">Episodes:</span>
                             <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto">
-                                <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                                </li>
-                                <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                                </li>
-                                <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                                </li>
-                                <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                                </li>
-                                <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                                </li>
-                                <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                                </li>
-                                <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                                </li>
-                                <li>
-                                    <span
-                                        className="line-clamp-1">здесь будут вводиться ссылки с названиями эпизодов</span>
-                                </li>
+                                {!!setActiveCharacterEpisodeId.length &&
+                                    <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto w-96">
+                                        {activeCharacterEpisodesData?.map(episode =>
+                                            <li key={episode.id}>
+                                                <span className="line-clamp-1">{episode.name}</span>
+                                            </li>
+                                        )}
+                                    </ul>}
                             </ul>
                         </div>
                         <div className="">
@@ -225,6 +221,7 @@ function Locations() {
     const [searchValueName, setSearchValueName] = useState('')
     const [searchValueType, setSearchValueType] = useState('')
     const [searchValueDimensions, setSearchValueDimensions] = useState('')
+    const [activeLocationCharactersId, setActiveLocationCharactersId] = useState<string[]>([])
 
     const debounceSearchTermName = useDebounce(searchValueName, 200)
     const debounceSearchTermType = useDebounce(searchValueType, 200)
@@ -253,6 +250,24 @@ function Locations() {
         if (isError) void audio.play()
     }, [isError]);
 
+    const {data: activeLocationCharactersData} = useQuery({
+        queryKey: ['locationCharactersData', activeLocationCharactersId],
+        queryFn: () => fetchMultipleCharactersData(activeLocationCharactersId),
+        enabled: !!activeLocationCharactersId.length
+    })
+
+    const setActive = (location: Location) => {
+        setActiveLocation(location)
+        setActiveLocationCharactersId(!location
+            ? []
+            : location.residents.reduce((acc, url) => {
+                const id = url.split('/').pop()
+                if (id) acc.push(id)
+                return acc
+            }, [] as string[])
+        )
+    }
+
     return (
         <div className="flex justify-center flex-col items-center mb-6">
             <div className="flex flex-row gap-6">
@@ -270,7 +285,7 @@ function Locations() {
                            fetchFunction={async () => void fetchNextPage()}>{
                     data && data.pages.map(page => {
                         return page.results.map(location => <LocationCard key={location.id} handlers={{
-                            chooseActiveCard: setActiveLocation,
+                            chooseActiveCard: setActive,
                             setModalActive: setIsModalOpen
                         }} location={location}/>)
                     })
@@ -281,19 +296,20 @@ function Locations() {
                     <div className="flex-col flex border-2 border-green-950 p-6 w-96">
                         <span
                             className="text-4xl font-bold text-green-950 underline mb-auto">{activeLocation.name}</span>
-                        <span className="text-md">{activeLocation.type}</span>
+                        <span className="text-md mt-4">{activeLocation.type}</span>
                         <span className="text-md">{activeLocation.dimension}</span>
                     </div>
                     <div>
                         <span className="text-2xl font-bold text-green-950 block mb-3">Characters:</span>
-                        <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto w-96">
-                            {/*      {activeCharacters?.results.map(character =>
-                                <li>
-                                    <span className="line-clamp-1">{character.name}</span>
-                                </li>
-                            )}*/}
-
-                        </ul>
+                        {!!activeLocationCharactersId.length &&
+                            <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto w-96">
+                                {activeLocationCharactersData?.map(character =>
+                                    <li key={character.id}>
+                                        <span className="line-clamp-1">{character.name}</span>
+                                    </li>
+                                )}
+                            </ul>}
+                        {!activeLocationCharactersId.length && <span>nothing to show</span>}
                     </div>
                 </div>
             }/>}
@@ -335,7 +351,7 @@ function Episodes() {
 
     const {data: activeEpisodeCharactersData} = useQuery({
         queryKey: ['episodeCharactersData', activeEpisodeCharacters],
-        queryFn:  () => fetchMultipleCharactersData(activeEpisodeCharacters),
+        queryFn: () => fetchMultipleCharactersData(activeEpisodeCharacters),
         enabled: !!activeEpisodeCharacters.length
     })
 
@@ -390,7 +406,7 @@ function Episodes() {
                     <div>
                         <span className="text-2xl font-bold text-green-950 block mb-3">Characters:</span>
                         <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto w-96">
-                                  {activeEpisodeCharactersData?.map(character =>
+                            {activeEpisodeCharactersData?.map(character =>
                                 <li key={character.id}>
                                     <span className="line-clamp-1">{character.name}</span>
                                 </li>
