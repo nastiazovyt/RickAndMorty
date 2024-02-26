@@ -1,9 +1,18 @@
+import {useEffect, useState} from "react";
+
 export function TextInputComponent({onInput, inputValue, placeholder, label}: {
     onInput: (inputValue: string) => void,
     inputValue: string,
     placeholder: string,
     label: string
 }) {
+
+    // [inputValue, onInput] = useState('')
+
+/*    useEffect(() => {
+        localStorage.setItem('name', inputValue)
+    }, [inputValue]);*/
+
     return (
         <label className='flex-col flex gap-y-1.5'>
             <span className='font-raleway text-green-800 font-bold'>{label}</span>

@@ -14,7 +14,9 @@ import {
     fetchEpisodesData,
     fetchCharactersData,
     fetchLocationsData,
-    fetchMultipleCharactersData, fetchMultipleEpisodesData
+    fetchMultipleCharactersData,
+    fetchMultipleEpisodesData,
+    localStorageSaver
 } from "./shared/helpers";
 import errorSound from '../src/assets/error.mp3'
 import {CardsGrid} from "./shared/ui/cardsGrid.tsx";
@@ -32,11 +34,17 @@ function App() {
 }
 
 function Content() {
-    const [value, setValue] = useState('Characters');
+    const [value, setValue] = useState(() => {
+        return localStorageSaver().get('mainChoice') ?? 'Characters'
+    });
 
     const changeValue = (e: { target: { value: SetStateAction<string> } }) => {
         setValue(e.target.value)
     }
+
+    useEffect(() => {
+        localStorageSaver().set('mainChoice', value)
+    }, [value]);
     return (
         <div className="flex flex-col gap-y-8 pt-4 w-[84rem] m-auto">
             <div
@@ -71,11 +79,21 @@ function Content() {
 function Characters() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeCharacter, setActiveCharacter] = useState<Character>()
-    const [searchValueName, setSearchValueName] = useState('')
-    const [searchValueType, setSearchValueType] = useState('')
-    const [searchValueSpecies, setSearchValueSpecies] = useState('')
-    const [searchValueGender, setSearchValueGender] = useState('')
-    const [searchValueStatus, setSearchValueStatus] = useState('')
+    const [searchValueName, setSearchValueName] = useState(() => {
+        return localStorageSaver().get('characterName') ?? ''
+    })
+    const [searchValueType, setSearchValueType] = useState(() => {
+        return localStorageSaver().get('characterType') ?? ''
+    })
+    const [searchValueSpecies, setSearchValueSpecies] = useState(() => {
+        return localStorageSaver().get('characterSpecies') ?? ''
+    })
+    const [searchValueGender, setSearchValueGender] = useState(() => {
+        return localStorageSaver().get('characterGender') ?? ''
+    })
+    const [searchValueStatus, setSearchValueStatus] = useState(() => {
+        return localStorageSaver().get('characterStatus') ?? ''
+    })
     const [activeCharacterEpisodeId, setActiveCharacterEpisodeId] = useState<string[]>([])
 
     const debounceSearchTermName = useDebounce(searchValueName, 200)
@@ -109,6 +127,14 @@ function Characters() {
     useEffect(() => {
         if (isError) void audio.play()
     }, [isError]);
+
+    useEffect(() => {
+        localStorageSaver().set('characterName', searchValueName)
+        localStorageSaver().set('characterType', searchValueType)
+        localStorageSaver().set('characterSpecies', searchValueSpecies)
+        localStorageSaver().set('characterGender', searchValueGender)
+        localStorageSaver().set('characterStatus', searchValueStatus)
+    }, [searchValueName, searchValueType, searchValueSpecies, searchValueGender, searchValueStatus]);
 
     const {data: activeCharacterEpisodesData} = useQuery({
         queryKey: ['characterEpisodesData', activeCharacterEpisodeId],
@@ -218,9 +244,15 @@ function Characters() {
 function Locations() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeLocation, setActiveLocation] = useState<Location>()
-    const [searchValueName, setSearchValueName] = useState('')
-    const [searchValueType, setSearchValueType] = useState('')
-    const [searchValueDimensions, setSearchValueDimensions] = useState('')
+    const [searchValueName, setSearchValueName] = useState(() => {
+        return localStorageSaver().get('locationName') ?? ''
+    })
+    const [searchValueType, setSearchValueType] = useState(() => {
+        return localStorageSaver().get('locationType') ?? ''
+    })
+    const [searchValueDimensions, setSearchValueDimensions] = useState(() => {
+        return localStorageSaver().get('locationDimensions') ?? ''
+    })
     const [activeLocationCharactersId, setActiveLocationCharactersId] = useState<string[]>([])
 
     const debounceSearchTermName = useDebounce(searchValueName, 200)
@@ -249,6 +281,12 @@ function Locations() {
     useEffect(() => {
         if (isError) void audio.play()
     }, [isError]);
+
+    useEffect(() => {
+        localStorageSaver().set('locationName', searchValueName)
+        localStorageSaver().set('locationType', searchValueType)
+        localStorageSaver().set('locationDimensions', searchValueDimensions)
+    }, [searchValueName, searchValueType, searchValueDimensions]);
 
     const {data: activeLocationCharactersData} = useQuery({
         queryKey: ['locationCharactersData', activeLocationCharactersId],
@@ -320,9 +358,15 @@ function Locations() {
 function Episodes() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [activeEpisode, setActiveEpisode] = useState<Episode>()
-    const [searchValueName, setSearchValueName] = useState('')
-    const [searchValueAirDate, setSearchValueAirDate] = useState('')
-    const [searchValueEpisode, setSearchValueEpisode] = useState('')
+    const [searchValueName, setSearchValueName] = useState(() => {
+        return localStorageSaver().get('episodeName') ?? ''
+    })
+    const [searchValueAirDate, setSearchValueAirDate] = useState(() => {
+        return localStorageSaver().get('airData') ?? ''
+    })
+    const [searchValueEpisode, setSearchValueEpisode] = useState(() => {
+        return localStorageSaver().get('episodeCode') ?? ''
+    })
     const [activeEpisodeCharacters, setActiveEpisodeCharacters] = useState<string[]>([])
 
     const debounceSearchTermName = useDebounce(searchValueName, 200)
@@ -358,6 +402,12 @@ function Episodes() {
     useEffect(() => {
         if (isError) void audio.play()
     }, [isError]);
+
+    useEffect(() => {
+        localStorageSaver().set('episodeName', searchValueName)
+        localStorageSaver().set('airData', searchValueAirDate)
+        localStorageSaver().set('episodeCode', searchValueEpisode)
+    }, [searchValueName, searchValueAirDate, searchValueEpisode]);
 
     const setActive = (episode: Episode) => {
         setActiveEpisode(episode)
