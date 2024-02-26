@@ -26,7 +26,7 @@ export function CardsGrid({children, status, hasNextPage, isFetchingNextPage, fe
                 <div className="flex items-center flex-col">
                     <ul className="grid grid-cols-3 gap-x-6 gap-y-8 m-auto mb-6">{children}</ul>
                     <span className="font-raleway"
-                          ref={ref}>{!hasNextPage ? 'nothing to load, this is the end =(' : isFetchingNextPage ? 'loading data...' : ''}</span>
+                          ref={ref}>{!hasNextPage ? 'this is the end =(' : isFetchingNextPage ? 'loading data...' : ''}</span>
                 </div>}
         </div>
     )

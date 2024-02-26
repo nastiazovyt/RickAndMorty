@@ -1,4 +1,4 @@
-import {CharacterResponse, EpisodesResponse, LocationResponse} from "../types.ts";
+import {Character, CharacterResponse, EpisodesResponse, LocationResponse} from "../types.ts";
 import {getCharacters, getLocations, getEpisodes, getMultipleCharacters} from "../api";
 
 export const fetchCharactersData = async ({name, pageParam, type, species, gender, status}: {
@@ -12,7 +12,8 @@ export const fetchCharactersData = async ({name, pageParam, type, species, gende
     return getCharacters(name, pageParam, type, species, gender, status)
 }
 
-export const fetchMultipleCharactersData = async (idArray: string[]): Promise<CharacterResponse> => {
+export const fetchMultipleCharactersData = async (idArray: string[]): Promise<Character[]> => {
+    console.log('запрос')
     return getMultipleCharacters(idArray)
 }
 

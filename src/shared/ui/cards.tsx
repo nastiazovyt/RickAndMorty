@@ -34,11 +34,14 @@ export function LocationCard({location, handlers}: {
     }
     return (
         <li onClick={onClickHandler}
-            className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-4 flex flex-col gap-y-4"
+            className="hover:shadow-2xl transition-all font-raleway
+            text-green-700 w-[20rem] ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden p-2 ps-4 pb-4 flex flex-col gap-y-8"
             key={location.id}>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{location.name}</span>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{location.type}</span>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{location.dimension}</span>
+            <span className="text-xl font-bold underline">{location.name}</span>
+            <div className="flex flex-col gap-y-1.5 mt-auto">
+                <span className="text-sm">{location.type}</span>
+                <span className="text-md">{location.dimension}</span>
+            </div>
         </li>
     )
 }
@@ -56,11 +59,14 @@ export function EpisodeCard({episode, handlers}: {
     }
     return (
         <li onClick={onClickHandler}
-            className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-4 flex flex-col gap-y-4"
+            className="hover:shadow-2xl transition-all font-raleway
+            text-green-700 w-[20rem] ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden p-2 ps-4 pb-4 flex flex-col gap-y-8"
             key={episode.id}>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{episode.name}</span>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{episode.air_date}</span>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{episode.episode}</span>
+            <span className="text-xl font-bold underline">{episode.name}</span>
+            <div className="flex flex-row gap-x-10 mt-auto">
+                <span className="text-sm">{episode.air_date}</span>
+                <span className="text-md">{episode.episode}</span>
+            </div>
         </li>
     )
 }
