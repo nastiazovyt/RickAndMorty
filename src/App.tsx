@@ -46,9 +46,9 @@ function Content() {
         localStorageSaver().set('mainChoice', value)
     }, [value]);
     return (
-        <div className="flex flex-col gap-y-8 pt-4 w-[84rem] m-auto">
+        <div className="flex flex-col gap-y-8 pt-4 2xl:w-[84rem] m-auto">
             <div
-                className="flex flex-row justify-center border-2 w-[inherit] bg-gray-50 text-xl h-fit p-3 gap-x-12 mb-4">
+                className="flex flex-row justify-center border-2 2xl:w-[inherit] w-4/5 m-auto bg-gray-50 text-xl h-fit p-3 gap-x-12 mb-4">
                 <label className="flex flex-row gap-x-2">
                     <input className="accent-yellow-100" type="radio" value="Characters"
                            checked={value === 'Characters'}
@@ -156,8 +156,8 @@ function Characters() {
 
     return (
         <div className="flex justify-center flex-col items-center mb-6">
-            <div className="flex flex-row gap-6">
-                <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2 relative">
+            <div className="flex flex-col gap-6 2xl:flex-row items-center 2xl:items-start">
+                <div className="2xl:w-80 w-4/5 border-2 bg-gray-50 h-fit p-3 flex-col items-center flex gap-y-2 relative">
                     <span
                         className="text-green-800 font-bold absolute -top-12 text-center -left-10 -rotate-12 block bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
                     <TextInputComponent onInput={setSearchValueName} inputValue={searchValueName}
@@ -182,13 +182,13 @@ function Characters() {
                 }</CardsGrid>
             </div>
             {isModalOpen && activeCharacter && <ModalComponent modalCloser={setIsModalOpen}>
-                <div className='h-[44rem]'>
-                    <div className="grid grid-rows-2 grid-cols-2 gap-x-12 gap-y-16">
-                        <img className="rounded-2xl w-[24rem] h-[24rem]" src={activeCharacter.image}
+                <div className='lg:h-[44rem] h-[36rem]'>
+                    <div className="grid grid-rows-2 grid-cols-2 lg:gap-x-12 lg:gap-y-16 gap-12">
+                        <img className="rounded-2xl lg:w-[24rem] lg:h-[24rem] w-80 h-80" src={activeCharacter.image}
                              alt={activeCharacter.name}/>
-                        <div className="flex-col flex border-2 border-green-950 p-6 w-96">
+                        <div className="flex-col flex border-2 border-green-950 p-6 lg:w-96">
                             <span
-                                className="text-4xl font-bold text-green-950 mb-1.5 underline">{activeCharacter.name}</span>
+                                className="lg:text-4xl text-2xl font-bold text-green-950 mb-1.5 underline">{activeCharacter.name}</span>
                             <span className="mb-12 text-md">{activeCharacter.status}</span>
                             <ul className="flex text-lg flex-col mt-auto leading-6">
                                 {
@@ -208,11 +208,11 @@ function Characters() {
                                 </li>
                             </ul>
                         </div>
-                        <div className="w-96">
+                        <div className="lg:w-96">
                             <span className="text-2xl font-bold text-green-950 block mb-3">Episodes:</span>
-                            <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto">
+                            <ul className="flex flex-col gap-y-1.5 lg:h-52 h-44 overflow-auto">
                                 {!!setActiveCharacterEpisodeId.length &&
-                                    <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto w-96">
+                                    <ul className="flex flex-col gap-y-1.5 lg:h-52 h-44 overflow-auto">
                                         {activeCharacterEpisodesData?.map(episode =>
                                             <li key={episode.id}>
                                                 <span className="line-clamp-1">{episode.name}</span>
@@ -308,8 +308,8 @@ function Locations() {
 
     return (
         <div className="flex justify-center flex-col items-center mb-6">
-            <div className="flex flex-row gap-6">
-                <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2 relative">
+            <div className="flex flex-col gap-6 2xl:flex-row items-center 2xl:items-start">
+                <div className="2xl:w-80 w-4/5 border-2 bg-gray-50 h-fit p-3 flex-col items-center flex gap-y-2 relative">
                     <span
                         className="text-green-800 font-bold absolute -top-12 text-center -left-10 -rotate-12 block bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
                     <TextInputComponent onInput={setSearchValueName} inputValue={searchValueName}
@@ -331,16 +331,16 @@ function Locations() {
             </div>
             {isModalOpen && activeLocation && <ModalComponent modalCloser={setIsModalOpen} children={
                 <div className="flex flex-row gap-x-12">
-                    <div className="flex-col flex border-2 border-green-950 p-6 w-96">
+                    <div className="flex-col flex border-2 border-green-950 p-6 lg:w-96 w-64">
                         <span
-                            className="text-4xl font-bold text-green-950 underline mb-auto">{activeLocation.name}</span>
+                            className="lg:text-4xl text-3xl font-bold text-green-950 underline mb-auto">{activeLocation.name}</span>
                         <span className="text-md mt-4">{activeLocation.type}</span>
                         <span className="text-md">{activeLocation.dimension}</span>
                     </div>
                     <div>
                         <span className="text-2xl font-bold text-green-950 block mb-3">Characters:</span>
                         {!!activeLocationCharactersId.length &&
-                            <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto w-96">
+                            <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto lg:w-96">
                                 {activeLocationCharactersData?.map(character =>
                                     <li key={character.id}>
                                         <span className="line-clamp-1">{character.name}</span>
@@ -424,8 +424,8 @@ function Episodes() {
 
     return (
         <div className="flex justify-center flex-col items-center mb-6">
-            <div className="flex flex-row gap-6">
-                <div className="w-80 border-2 bg-gray-50 h-fit p-3 flex-col flex gap-y-2 relative">
+            <div className="flex flex-col gap-6 2xl:flex-row items-center 2xl:items-start">
+                <div className="2xl:w-80 w-4/5 border-2 bg-gray-50 h-fit p-3 flex-col items-center flex gap-y-2 relative">
                     <span
                         className="text-green-800 font-bold absolute -top-12 text-center -left-10 -rotate-12 block bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
                     <TextInputComponent onInput={setSearchValueName} inputValue={searchValueName}
@@ -447,15 +447,15 @@ function Episodes() {
             </div>
             {isModalOpen && activeEpisode && <ModalComponent modalCloser={setIsModalOpen} children={
                 <div className="flex flex-row gap-x-12">
-                    <div className="flex-col flex border-2 border-green-950 p-6 w-96">
+                    <div className="flex-col flex border-2 border-green-950 p-6 lg:w-96 w-64">
                         <span
-                            className="text-4xl font-bold text-green-950 underline mb-auto">{activeEpisode.name}</span>
+                            className="lg:text-4xl text-3xl font-bold text-green-950 underline mb-auto">{activeEpisode.name}</span>
                         <span className="text-md">{activeEpisode.episode}</span>
                         <span className="text-md">{activeEpisode.air_date}</span>
                     </div>
                     <div>
                         <span className="text-2xl font-bold text-green-950 block mb-3">Characters:</span>
-                        <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto w-96">
+                        <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto lg:w-96 w-48">
                             {activeEpisodeCharactersData?.map(character =>
                                 <li key={character.id}>
                                     <span className="line-clamp-1">{character.name}</span>

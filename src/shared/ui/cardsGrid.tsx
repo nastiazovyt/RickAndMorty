@@ -17,7 +17,7 @@ export function CardsGrid({children, status, hasNextPage, isFetchingNextPage, fe
     }, [inView, hasNextPage, fetchFunction]);
 
     return (
-        <div className="w-[62rem]">
+        <div className="w-4/5 2xl:w-[62rem]">
             {status === 'pending' && <span className='font-raleway'>loading data...</span>}
             {status === 'error' &&
                 <span
