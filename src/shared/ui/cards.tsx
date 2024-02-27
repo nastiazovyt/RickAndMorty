@@ -35,7 +35,7 @@ export function LocationCard({location, handlers}: {
     return (
         <li onClick={onClickHandler}
             className="hover:shadow-2xl transition-all font-raleway
-            text-green-700 2xl:w-[20rem] ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden p-2 ps-4 pb-4 flex flex-col gap-y-8"
+            text-green-700 2xl:w-[20rem] sm:w-full w-[20rem] ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden p-2 ps-4 pb-4 flex flex-col gap-y-8"
             key={location.id}>
             <span className="text-xl font-bold underline">{location.name}</span>
             <div className="flex flex-col gap-y-1.5 mt-auto">
@@ -60,7 +60,7 @@ export function EpisodeCard({episode, handlers}: {
     return (
         <li onClick={onClickHandler}
             className="hover:shadow-2xl transition-all font-raleway
-            text-green-700 2xl:w-[20rem] ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden p-2 ps-4 pb-4 flex flex-col gap-y-8"
+            text-green-700 2xl:w-[20rem] sm:w-full w-[20rem] ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden p-2 ps-4 pb-4 flex flex-col gap-y-8"
             key={episode.id}>
             <span className="text-xl font-bold underline">{episode.name}</span>
             <div className="flex lg:flex-row flex-col gap-x-10 mt-auto">

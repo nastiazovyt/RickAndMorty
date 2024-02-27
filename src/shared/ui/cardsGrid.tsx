@@ -17,14 +17,14 @@ export function CardsGrid({children, status, hasNextPage, isFetchingNextPage, fe
     }, [inView, hasNextPage, fetchFunction]);
 
     return (
-        <div className="w-4/5 2xl:w-[62rem]">
+        <div>
             {status === 'pending' && <span className='font-raleway'>loading data...</span>}
             {status === 'error' &&
                 <span
                     className='font-raleway'>oops, something went wrong <br/> try changing the search parameters</span>}
             {status === 'success' &&
                 <div className="flex items-center flex-col">
-                    <ul className="grid grid-cols-3 gap-x-6 gap-y-8 m-auto mb-6">{children}</ul>
+                    <ul className="sm:grid flex flex-col grid-cols-3 gap-x-6 gap-y-8 m-auto mb-6">{children}</ul>
                     <span className="font-raleway"
                           ref={ref}>{!hasNextPage ? 'this is the end =(' : isFetchingNextPage ? 'loading data...' : ''}</span>
                 </div>}

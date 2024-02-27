@@ -10,7 +10,7 @@ export function ModalComponent({children, modalCloser}: {children: ReactNode, mo
     return (
         <div className="fixed h-dvh w-dvw top-0 left-0 z-20 font-raleway">
             <div className="flex justify-center items-center h-full bg-[#00000033]">
-                <div ref={modalRef} className="lg:p-12 p-8 lg:w-[56rem] w-4/5 h-fit bg-white rounded-2xl shadow-2xl">
+                <div ref={modalRef} className="2xl:p-12 p-8 2xl:w-[56rem] lg:w-3/5 w-4/5 h-fit bg-white rounded-2xl shadow-2xl">
                     {children}
                 </div>
             </div>
