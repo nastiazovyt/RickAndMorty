@@ -1,13 +1,12 @@
-import {Character, Episode, Location} from "../types.ts";
 import {ReactNode} from "react";
 
-export function Card({children, handlers, data}: {
+export function Card<T extends {id: number}>({children, handlers, data}: {
     children: ReactNode,
+    data: T
     handlers: {
-        chooseActiveCard: (data: Character | Location | Episode) => void,
+        chooseActiveCard: (data: T) => void,
         setModalActive: (isActive: boolean) => void
     },
-    data: Character | Location | Episode
 }) {
     const onClickHandler = () => {
         handlers.chooseActiveCard(data)

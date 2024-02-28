@@ -1,6 +1,5 @@
-import {Character, CharacterResponse, Episode, EpisodesResponse, LocationResponse} from "../types.ts";
-import {getCharacters, getLocations, getEpisodes, getMultipleCharacters} from "../api";
-import {getMultipleEpisodes} from "../api/getMultipleEpisodes.ts";
+import {Character, CharacterResponse, Episode, EpisodesResponse, LocationResponse} from "./types.ts";
+import {getCharacters, getLocations, getEpisodes, getMultipleCharacters, getMultipleEpisodes} from "../api";
 
 export const fetchCharactersData = async ({name, pageParam, type, species, gender, status}: {
     name: string,
@@ -11,14 +10,6 @@ export const fetchCharactersData = async ({name, pageParam, type, species, gende
     status: string
 }): Promise<CharacterResponse> => {
     return getCharacters(name, pageParam, type, species, gender, status)
-}
-
-export const fetchMultipleCharactersData = async (idArray: string[]): Promise<Character[]> => {
-    return getMultipleCharacters(idArray)
-}
-
-export const fetchMultipleEpisodesData = async (idArray: string[]): Promise<Episode[]> => {
-    return getMultipleEpisodes(idArray)
 }
 
 export const fetchLocationsData = async ({name, pageParam, type, dimension,}: {
@@ -37,4 +28,12 @@ export const fetchEpisodesData = async ({name, pageParam, air_date, episode,}: {
     episode: string,
 }): Promise<EpisodesResponse> => {
     return getEpisodes(name, pageParam, air_date, episode)
+}
+
+export const fetchMultipleCharactersData = async (idArray: string[]): Promise<Character[]> => {
+    return getMultipleCharacters(idArray)
+}
+
+export const fetchMultipleEpisodesData = async (idArray: string[]): Promise<Episode[]> => {
+    return getMultipleEpisodes(idArray)
 }

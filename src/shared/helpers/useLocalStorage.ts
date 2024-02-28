@@ -9,8 +9,8 @@ export const localStorageSaver = {
     }
 }
 
-export const withDefault = (key: string) => {
-    return () => localStorageSaver.get(key) ?? ''
+export const withDefault = (key: string, defaultString: string) => {
+    return () => localStorageSaver.get(key) ?? defaultString
 }
 
 export const setWithLocalStorage = (key: string, setter: (value: string) => void) => {

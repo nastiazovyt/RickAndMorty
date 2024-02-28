@@ -55,7 +55,7 @@ export type Location = {
     name: string,
     type: string,
     dimension: string,
-    characters: string[]
+    residents: string[]
     url: string,
     created: string
 }
