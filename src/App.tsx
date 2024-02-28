@@ -3,9 +3,7 @@ import {
     TextInputComponent,
     DropdownComponent,
     ModalComponent,
-    EpisodeCard,
-    LocationCard,
-    CharacterCard
+    Card
 } from "./shared/ui";
 import {keepPreviousData, QueryClient, QueryClientProvider, useInfiniteQuery, useQuery} from "@tanstack/react-query";
 import {SetStateAction, useEffect, useState} from "react";
@@ -164,10 +162,16 @@ function Characters() {
                 <CardsGrid status={status} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage}
                            fetchFunction={async () => void fetchNextPage()}>{
                     data && data.pages.map(page => {
-                        return page.results.map(character => <CharacterCard key={character.id} handlers={{
+                        return page.results.map(character => <Card data={character} key={character.id} handlers={{
                             chooseActiveCard: setActive,
                             setModalActive: setIsModalOpen
-                        }} character={character}/>)
+                        }} character={character}>{
+                            <div className="font-raleway text-green-700 pb-4 flex flex-col gap-y-4">
+                                <img className="w-80 h-auto" src={character.image} alt={character.name}/>
+                                <span
+                                    className="ps-3 pe-3 w-80 sm:w-full lg:w-80 font-raleway leading-5 text-green-700 text-md font-bold">{character.name}</span>
+                            </div>
+                        }</Card>)
                     })
                 }</CardsGrid>
             </div>
@@ -282,7 +286,7 @@ function Locations() {
         setActiveLocation(location)
         setActiveLocationCharactersId(!location
             ? []
-            : location.residents.reduce((acc, url) => {
+            : location.characters.reduce((acc, url) => {
                 const id = url.split('/').pop()
                 if (id) acc.push(id)
                 return acc
@@ -308,35 +312,43 @@ function Locations() {
                 <CardsGrid status={status} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage}
                            fetchFunction={async () => void fetchNextPage()}>{
                     data && data.pages.map(page => {
-                        return page.results.map(location => <LocationCard key={location.id} handlers={{
+                        return page.results.map(location => <Card data={location} key={location.id} handlers={{
                             chooseActiveCard: setActive,
                             setModalActive: setIsModalOpen
-                        }} location={location}/>)
+                        }} location={location}>{
+                            <div className="font-raleway text-green-700 p-2 ps-4 pb-4 flex flex-col gap-y-8">
+                                <span className="text-xl font-bold underline">{location.name}</span>
+                                <div className="flex flex-col gap-y-1.5 mt-auto">
+                                    <span className="text-sm">{location.type}</span>
+                                    <span className="text-md">{location.dimension}</span>
+                                </div>
+                            </div>
+                        }</Card>)
                     })
                 }</CardsGrid>
             </div>
-            {isModalOpen && activeLocation && <ModalComponent modalCloser={setIsModalOpen} children={
-                <div className="flex sm:flex-row flex-col gap-x-12 gap-y-4 sm:gap-y-0">
-                    <div className="flex-col flex border-2 border-green-950 p-6 lg:w-96 sm:w-64">
+            {isModalOpen && activeLocation && <ModalComponent modalCloser={setIsModalOpen}>
+                {<div className="flex sm:flex-row flex-col gap-x-12 gap-y-4 sm:gap-y-0">
+                        <div className="flex-col flex border-2 border-green-950 p-6 lg:w-96 sm:w-64">
                         <span
                             className="lg:text-4xl sm:text-3xl text-2xl mb-4 font-bold text-green-950 underline sm:mb-auto">{activeLocation.name}</span>
-                        <span className="text-md mt-4">{activeLocation.type}</span>
-                        <span className="text-md">{activeLocation.dimension}</span>
-                    </div>
-                    <div>
-                        <span className="text-2xl font-bold text-green-950 block mb-3">Characters:</span>
-                        {!!activeLocationCharactersId.length &&
-                            <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto lg:w-96">
-                                {activeLocationCharactersData?.map(character =>
-                                    <li key={character.id}>
-                                        <span className="line-clamp-1">{character.name}</span>
-                                    </li>
-                                )}
-                            </ul>}
-                        {!activeLocationCharactersId.length && <span>nothing to show</span>}
-                    </div>
-                </div>
-            }/>}
+                            <span className="text-md mt-4">{activeLocation.type}</span>
+                            <span className="text-md">{activeLocation.dimension}</span>
+                        </div>
+                        <div>
+                            <span className="text-2xl font-bold text-green-950 block mb-3">Characters:</span>
+                            {!!activeLocationCharactersId.length &&
+                                <ul className="flex flex-col gap-y-1.5 h-52 overflow-auto lg:w-96">
+                                    {activeLocationCharactersData?.map(character =>
+                                        <li key={character.id}>
+                                            <span className="line-clamp-1">{character.name}</span>
+                                        </li>
+                                    )}
+                                </ul>}
+                            {!activeLocationCharactersId.length && <span>nothing to show</span>}
+                        </div>
+                    </div>}
+            </ModalComponent>}
         </div>
     )
 }
@@ -387,7 +399,6 @@ function Episodes() {
 
     const setActive = (episode: Episode) => {
         setActiveEpisode(episode)
-
         setActiveEpisodeCharacters(!episode
             ? []
             : episode.characters.reduce((acc, url) => {
@@ -416,14 +427,20 @@ function Episodes() {
                 <CardsGrid status={status} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage}
                            fetchFunction={async () => void fetchNextPage()}>{
                     data && data.pages.map(page => {
-                        return page.results.map(episode => <EpisodeCard key={episode.id} handlers={{
+                        return page.results.map(episode => <Card data={episode} key={episode.id} handlers={{
                             chooseActiveCard: setActive,
                             setModalActive: setIsModalOpen
-                        }} episode={episode}/>)
+                        }} episode={episode}>{
+                            <div className="font-raleway text-green-700 flex flex-col gap-y-8 ps-4 p-2 pb-4"><span className="text-xl font-bold underline">{episode.name}</span>
+                                <div className="flex lg:flex-row flex-col gap-x-10 mt-auto">
+                                    <span className="text-sm">{episode.air_date}</span>
+                                    <span className="text-md">{episode.episode}</span>
+                                </div></div>
+                        }</Card>)
                     })
                 }</CardsGrid>
             </div>
-            {isModalOpen && activeEpisode && <ModalComponent modalCloser={setIsModalOpen} children={
+            {isModalOpen && activeEpisode && <ModalComponent modalCloser={setIsModalOpen}>{
                 <div className="flex sm:flex-row flex-col gap-x-12 gap-y-4 sm:gap-y-0">
                     <div className="flex-col flex border-2 border-green-950 sm:p-6 p-2 lg:w-96 sm:w-64">
                         <span
@@ -442,7 +459,7 @@ function Episodes() {
                         </ul>
                     </div>
                 </div>
-            }/>}
+            }</ModalComponent>}
         </div>
     )
 }
