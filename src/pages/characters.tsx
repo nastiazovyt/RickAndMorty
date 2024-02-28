@@ -112,24 +112,17 @@ export function Characters() {
                 }</CardsGrid>
             </div>
             {isModalOpen && activeCharacter && <ModalComponent modalCloser={setIsModalOpen}>
-                <div className='2xl:h-[44rem] h-[36rem]'>
+                <div className='2xl:h-[44rem] max-h-[36rem]'>
                     <div
                         className="sm:grid flex flex-col grid-rows-2 grid-cols-2 lg:gap-x-12 2xl:gap-y-16 sm:gap-12 gap-6">
                         <img className="rounded-2xl 2xl:w-[24rem] 2xl:h-[24rem] sm:w-64 sm:h-64 hidden sm:block"
                              src={activeCharacter.image}
                              alt={activeCharacter.name}/>
-                        <div className="flex-col flex border-2 border-green-950 sm:p-6 p-4 2xl:w-96">
+                        <div className="flex-col flex border-2 border-green-950 sm:p-6 p-4 2xl:w-96 min-h-52">
                             <span
                                 className="2xl:text-4xl sm:text-2xl text-xl font-bold text-green-950 mb-1.5 underline">{activeCharacter.name}</span>
                             <span className="2xl:mb-12 text-md">{activeCharacter.status}</span>
                             <ul className="flex text-lg flex-col mt-auto leading-6">
-                                {
-                                    activeCharacter.type &&
-                                    <li className="flex gap-x-3">
-                                        <span className="text-green-900 font-bold">type:</span>
-                                        <span>{activeCharacter.type}</span>
-                                    </li>
-                                }
                                 <li className="flex gap-x-3">
                                     <span className="text-green-900 font-bold">gender:</span>
                                     <span>{activeCharacter.gender}</span>
@@ -138,31 +131,36 @@ export function Characters() {
                                     <span className="text-green-900 font-bold">species:</span>
                                     <span>{activeCharacter.species}</span>
                                 </li>
+                                {
+                                    activeCharacter.type &&
+                                    <li className="flex gap-x-3">
+                                        <span className="text-green-900 font-bold">type:</span>
+                                        <span>{activeCharacter.type}</span>
+                                    </li>
+                                }
                             </ul>
                         </div>
                         <div className="2xl:w-96">
                             <span
                                 className="sm:text-2xl text-xl font-bold text-green-950 block mb-2 sm:mb-3">Episodes:</span>
-                            <ul className="flex flex-col gap-y-1.5 2x;:h-52 h-44 overflow-auto">
                                 {!!setActiveCharacterEpisodeId.length &&
-                                    <ul className="flex flex-col gap-y-1.5 2xl:h-52 h-44 overflow-auto">
+                                    <ul className="flex flex-col gap-y-1.5 2xl:h-52 h-fit max-h-32 sm:max-h-44 overflow-auto">
                                         {activeCharacterEpisodesData?.map(episode =>
                                             <li key={episode.id}>
-                                                <span className="line-clamp-1">{episode.name}</span>
+                                                <span className="line-clamp-1 sm:text-lg text-sm">{episode.name}</span>
                                             </li>
                                         )}
                                     </ul>}
-                            </ul>
                         </div>
-                        <div className="">
+                        <div>
                             <span
                                 className="sm:text-2xl text-xl font-bold text-green-950 block mb-2 sm:mb-3">Locations:</span>
                             <ul className="flex flex-col sm:gap-y-6 gap-y-3">
-                                <li className="flex flex-col text-lg">
+                                <li className="flex flex-col text-sm sm:text-lg">
                                     <span className="text-green-900 font-bold">last known location:</span>
                                     <span>{activeCharacter.location.name}</span>
                                 </li>
-                                <li className="flex flex-col text-lg">
+                                <li className="flex flex-col text-sm sm:text-lg">
                                     <span className="text-green-900 font-bold">origin location:</span>
                                     <span>{activeCharacter.origin.name}</span>
                                 </li>
