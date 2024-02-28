@@ -16,7 +16,7 @@ export function CharacterCard({character, handlers}: {
             className="hover:shadow-2xl transition-all ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden pb-4 flex flex-col gap-y-4"
             key={character.id}>
             <img className="w-80 h-auto" src={character.image} alt={character.name}/>
-            <span className="ps-3 font-raleway leading-5 text-green-700 text-md font-bold">{character.name}</span>
+            <span className="ps-3 pe-3 w-80 sm:w-full lg:w-80 font-raleway leading-5 text-green-700 text-md font-bold">{character.name}</span>
         </li>
     )
 }
