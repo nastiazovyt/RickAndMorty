@@ -83,7 +83,7 @@ export function Characters() {
                 <div
                     className="2xl:w-80 w-full border-2 bg-gray-50 h-fit p-3 flex-col items-center flex gap-y-2 relative">
                     <span
-                        className="text-green-800 font-bold absolute sm:-top-12 -top-14 text-center sm:-left-10 -left-7 -rotate-12 block bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
+                        className="text-green-800 font-bold absolute -top-12 sm:block hidden text-center -left-10 -rotate-12 bg-amber-200 p-2 rounded-2xl">turn on <br/>the sound</span>
                     <TextInputComponent onInput={saveName} inputValue={searchValueName}
                                         placeholder={'Enter the name here'} label={'Name'}/>
                     <TextInputComponent onInput={saveType} inputValue={searchValueType}
@@ -100,7 +100,7 @@ export function Characters() {
                     data && data.pages.map(page => {
                         return page.results.map(character => <Card data={character} key={character.id} handlers={{
                             chooseActiveCard: setActive,
-                            setModalActive: setIsModalOpen
+                            setModalActive: setIsModalOpen,
                         }}>{
                             <div className="font-raleway text-green-700 pb-4 flex flex-col gap-y-4">
                                 <img className="w-80 h-auto" src={character.image} alt={character.name}/>

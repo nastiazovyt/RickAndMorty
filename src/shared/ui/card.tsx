@@ -1,6 +1,6 @@
 import {ReactNode} from "react";
 
-export function Card<T extends {id: number}>({children, handlers, data}: {
+export function Card<T extends { id: number }>({children, handlers, data}: {
     children: ReactNode,
     data: T
     handlers: {
@@ -15,8 +15,7 @@ export function Card<T extends {id: number}>({children, handlers, data}: {
 
     return (
         <li onClick={onClickHandler}
-            className="hover:shadow-2xl transition-all
-             2xl:w-[20rem] sm:w-full w-[20rem] ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden"
+            className="hover:shadow-2xl transition-all 2xl:w-[20rem] sm:w-full w-[20rem] ease-in-out duration-200 cursor-pointer rounded-2xl shadow-md overflow-hidden"
             key={data.id}>
             {children}
         </li>

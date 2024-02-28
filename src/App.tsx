@@ -18,19 +18,19 @@ function App() {
             <div className="flex flex-col gap-y-8 pt-4 m-auto">
                 <div className="flex sm:flex-row flex-col justify-center border-2 xl:w-[64rem] w-4/5 m-auto bg-gray-50 text-xl h-fit p-3 gap-x-12 mb-4">
                     <label className="flex flex-row gap-x-2">
-                        <input className="accent-yellow-100" type="radio" value="Characters"
+                        <input className="accent-yellow-100 w-3" type="radio" value="Characters"
                                checked={value === 'Characters'}
                                onChange={changeValue}/>
                         <span className="font-raleway text-green-900 font-bold">Characters</span>
                     </label>
                     <label className="flex flex-row gap-x-2">
-                        <input className="accent-yellow-100" type="radio" value="Locations"
+                        <input className="accent-yellow-100 w-3" type="radio" value="Locations"
                                checked={value === 'Locations'}
                                onChange={changeValue}/>
                         <span className="font-raleway text-green-900 font-bold">Locations</span>
                     </label>
                     <label className="flex flex-row gap-x-2">
-                        <input className="accent-yellow-100" type="radio" value="Episodes"
+                        <input className="accent-yellow-100 w-3" type="radio" value="Episodes"
                                checked={value === 'Episodes'}
                                onChange={changeValue}/>
                         <span className="font-raleway text-green-900 font-bold">Episodes</span>
