@@ -1,26 +1,23 @@
+import {expect, test} from "@jest/globals";
 import {getCharacters} from "./shared/api";
-import axios from "axios";
 
-test('should return a success if the GET was successful', async () => {
-    const mockResponse = {
-        data: {
-            results: [
-                {name: 'Rick'},
-                {page: 1},
-                {type: 'Human'},
-                {species: 'none'},
-                {gender: 'Male'},
-                {status: 'Dead'}
-            ]
-        },
+describe('Check characters get request', () => {
+    test('Is the GET was successful', async () => {
+        const charactersData = await getCharacters('Rick', 1, '', '', '', '')
 
-    }
+        expect(charactersData).toMatchObject({
+            info: expect.any(Object),
+            results: expect.any(Array)
+        })
 
-    axios.get = jest
-        .fn()
-        .mockResolvedValue(mockResponse)
+        expect(charactersData.results.length).not.toBe(0)
+    })
 
-    const charactersData = await getCharacters('Rick', 1, 'Human', 'none', 'Male', 'Dead')
+    test('Response data was not empty', async () => {
+        const charactersData = await getCharacters('Rick', 1, '', '', '', '')
 
-    expect(mockResponse.data).toEqual(charactersData)
+        expect(charactersData.results.length).not.toBe(0)
+    })
 })
+
+
