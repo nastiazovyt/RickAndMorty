@@ -112,7 +112,7 @@ export function Characters() {
                 }</CardsGrid>
             </div>
             {isModalOpen && activeCharacter && <ModalComponent modalCloser={setIsModalOpen}>
-                <div className='2xl:h-[44rem] max-h-[36rem]'>
+                <div className='2xl:h-[44rem] max-h-[36rem] sm:max-h-[44rem]'>
                     <div
                         className="sm:grid flex flex-col grid-rows-2 grid-cols-2 lg:gap-x-12 2xl:gap-y-16 sm:gap-12 gap-6">
                         <img className="rounded-2xl 2xl:w-[24rem] 2xl:h-[24rem] sm:w-64 sm:h-64 hidden sm:block"
