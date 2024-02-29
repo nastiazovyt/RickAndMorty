@@ -6,7 +6,7 @@ describe('Set local storage item', () => {
         window.localStorage.clear();
     });
 
-    test('Is the data saves to local storage', () => {
+    test('Data was saved to local storage', () => {
         const mockKey = "1";
         const mockData = "mock data";
 
@@ -14,7 +14,7 @@ describe('Set local storage item', () => {
         expect(localStorage.getItem(mockKey)).toEqual(JSON.stringify(mockData));
     })
 
-    test('Is the data gets from local storage', () => {
+    test('Data was loaded from local storage', () => {
         const mockKey = "2";
         const mockData = "mock data";
 
@@ -22,7 +22,7 @@ describe('Set local storage item', () => {
         expect(localStorageSaver.get(mockKey)).toEqual((mockData));
     })
 
-    test('Is the data changed in local storage', () => {
+    test('Data was changed in local storage', () => {
         const mockKey = "3";
         const mockDataOld = "mock data old";
         const mockDataNew = "mock data new";
